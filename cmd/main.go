@@ -26,8 +26,9 @@ var (
 	udpIpOverride          = kingpin.Flag("udp.ip-override", "Override the IP address of the server with this value.").Default("").String()
 	syslogListenAddress    = kingpin.Flag("udp.listen-address", "Address where to expose port for gathering metrics. - format <address>:<port>").Default("0.0.0.0:8514").String()
 	udpPrefix              = kingpin.Flag("udp.prefix", "Prefix for udp metrics").Default("prusa_").String()
-	udpAllMetrics          = kingpin.Flag("udp.all-metrics", "Expose all udp metrics. SEVERELY IMPACT CPU CAPABILITIES OF THE PRINTER!").Default("false").Bool()
 	udpExtraMetrics        = kingpin.Flag("udp.extra-metrics", "Comma separated list of extra udp metrics to expose.").Default("").String()
+	udpAllMetrics          = kingpin.Flag("udp.all-metrics", "Expose all udp metrics. SEVERELY IMPACT CPU CAPABILITIES OF THE PRINTER! - default false").Default("false").Bool()
+	udpGcodeEnabled        = kingpin.Flag("udp.gcode-enabled", "Enable generating and sending metrics gcode. - default true").Default("true").Bool()
 	udpRegistry            = prometheus.NewRegistry()
 )
 
@@ -122,8 +123,12 @@ func Run() {
 
 	log.Info().Msg("PrusaLink metrics enabled!")
 	collectors = append(collectors, prusalink.NewCollector(config))
-	prusalink.EnableUDPmetrics(config.Printers)
 
+	if *udpGcodeEnabled {
+		prusalink.EnableUDPmetrics(config.Printers)
+	} else {
+		log.Warn().Msg("Not enabling UDP metrics, because gcode generation is disabled")
+	}
 	// starting syslog server
 
 	log.Info().Msg("Syslog server starting at: " + *syslogListenAddress)
