@@ -30,7 +30,8 @@ services:
     restart: unless-stopped
     volumes:
       - type: bind
-        source: ./docs/config/prusa.yml
+        source: ./prusa.yml
+        #source: ./docs/config/prusa.yml
         target: /app/prusa.yml
     ports:
       - "10009:10009"

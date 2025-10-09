@@ -60,6 +60,7 @@ var (
 		"hbr_fan_act",
 		"hbr_fan_enc",
 		"cpu_usage",
+		"heap",
 		"heap_free",
 		"heap_total",
 		"fsensor",
