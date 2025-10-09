@@ -257,7 +257,6 @@ func EnableUDPmetrics(printers []config.Printers) {
 			configuration.Printers[i].UDPMetricsEnabled = true
 			log.Info().Msgf("UDP metrics gcode for printer %s (%s) sent and started", s.Name, s.Address)
 		}(i, s)
-		wg.Wait()
 	}
-
+	wg.Wait()
 }
