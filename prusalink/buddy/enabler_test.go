@@ -98,9 +98,7 @@ func TestGcodeInit(t *testing.T) {
 			configuration = config.Config{}
 			configuration.Exporter.IpOverride = tc.ipOverride
 
-			printer := config.Printers{}
-
-			gcode, err := gcodeInit(printer)
+			gcode, err := gcodeInit()
 
 			if tc.expectError && err == nil {
 				t.Errorf("gcodeInit() expected error but got none")
@@ -555,11 +553,9 @@ func BenchmarkGcodeInit(b *testing.B) {
 	configuration = config.Config{}
 	configuration.Exporter.IpOverride = "10.0.0.1"
 
-	printer := config.Printers{}
-
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := gcodeInit(printer)
+		_, err := gcodeInit()
 		if err != nil {
 			b.Errorf("gcodeInit() error: %v", err)
 		}

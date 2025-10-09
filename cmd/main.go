@@ -120,7 +120,7 @@ func Run() {
 
 	log.Info().Msg("PrusaLink metrics enabled!")
 	collectors = append(collectors, prusalink.NewCollector(config))
-	go prusalink.EnableUDPmetrics(config.Printers)
+	prusalink.EnableUDPmetrics(config.Printers)
 
 	// starting syslog server
 
