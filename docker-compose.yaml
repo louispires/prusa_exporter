@@ -39,6 +39,7 @@ services:
       - "--config.file=/app/prusa.yml"
       - "--log.level=info"
       - "--prusalink.scrape-timeout=5"
+      - "--udp.ip-override=${HOST_IP}"
     depends_on:
       - prometheus
     networks:
