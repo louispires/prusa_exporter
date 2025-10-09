@@ -21,25 +21,24 @@ type Collector struct {
 type MetricName string
 
 const (
-	MetricPrinterTemp               MetricName = "prusa_temperature_celsius"
-	MetricPrinterTempTarget                    = "prusa_temperature_target_celsius"
-	MetricPrinterPrintTimeRemaining            = "prusa_printing_time_remaining_seconds"
-	MetricPrinterPrintProgressRatio            = "prusa_printing_progress_ratio"
-	MetricPrinterFiles                         = "prusa_files_count"
-	MetricPrinterMaterial                      = "prusa_material_info"
-	MetricPrinterPrintTime                     = "prusa_print_time_seconds"
-	MetricPrinterUp                            = "prusa_up"
-	MetricPrinterNozzleSize                    = "prusa_nozzle_size_meters"
-	MetricPrinterStatus                        = "prusa_status_info"
-	MetricPrinterAxis                          = "prusa_axis"
-	MetricPrinterFlow                          = "prusa_print_flow_ratio"
-	MetricPrinterInfo                          = "prusa_info"
-	MetricPrinterMMU                           = "prusa_mmu"
-	MetricPrinterFanSpeedRpm                   = "prusa_fan_speed_rpm"
-	MetricPrinterPrintSpeedRatio               = "prusa_print_speed_ratio"
-	//MetricPrinterJobImage                       = "prusa_job_image"
-	MetricPrinterCurrentJob          = "prusa_job"
-	MetricPrinterUDPMetricsGcodeSent = "prusa_udp_metrics_gcode_sent"
+	MetricPrinterTemp                MetricName = "prusa_temperature_celsius"
+	MetricPrinterTempTarget                     = "prusa_temperature_target_celsius"
+	MetricPrinterPrintTimeRemaining             = "prusa_printing_time_remaining_seconds"
+	MetricPrinterPrintProgressRatio             = "prusa_printing_progress_ratio"
+	MetricPrinterFiles                          = "prusa_files_count"
+	MetricPrinterMaterial                       = "prusa_material_info"
+	MetricPrinterPrintTime                      = "prusa_print_time_seconds"
+	MetricPrinterUp                             = "prusa_up"
+	MetricPrinterNozzleSize                     = "prusa_nozzle_size_meters"
+	MetricPrinterStatus                         = "prusa_status_info"
+	MetricPrinterAxis                           = "prusa_axis"
+	MetricPrinterFlow                           = "prusa_print_flow_ratio"
+	MetricPrinterInfo                           = "prusa_info"
+	MetricPrinterMMU                            = "prusa_mmu"
+	MetricPrinterFanSpeedRpm                    = "prusa_fan_speed_rpm"
+	MetricPrinterPrintSpeedRatio                = "prusa_print_speed_ratio"
+	MetricPrinterCurrentJob                     = "prusa_job"
+	MetricPrinterUDPMetricsGcodeSent            = "prusa_udp_metrics_gcode_sent"
 )
 
 type metricDesc struct {
@@ -64,7 +63,6 @@ var metrics = []metricDesc{
 	{MetricPrinterMMU, "Returns information if MMU is enabled.", nil},
 	{MetricPrinterFanSpeedRpm, "Returns information about speed of hotend fan in rpm.", []string{"fan"}},
 	{MetricPrinterPrintSpeedRatio, "Current setting of printer speed in values from 0.0 - 1.0", nil},
-	//{MetricPrinterJobImage, "Returns information about image of current print job.", []string{"printer_job_image"}},
 }
 
 // Unlike `metrics`, these ignore common labels.
@@ -320,21 +318,6 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 				ch <- printerStatus
 			}
-
-			/*
-				if c.metricEnabled(MetricPrinterJobImage) && getStateFlag(printer) == 4 {
-					image, err := GetJobImage(s, job.Job.File.Path)
-
-					if err != nil {
-						log.Error().Msg("Error while scraping image endpoint at " + s.Address + " - " + err.Error())
-					} else {
-						printerJobImage := prometheus.MustNewConstMetric(c.metricDesc[MetricPrinterJobImage], prometheus.GaugeValue,
-							1, c.GetLabels(s, job, image)...)
-
-						ch <- printerJobImage
-					}
-				}
-			*/
 
 			printerUp = prometheus.MustNewConstMetric(c.metricDesc[MetricPrinterUp], prometheus.GaugeValue,
 				1, s.Address, s.Type, s.Name)
