@@ -16,6 +16,8 @@ import (
 
 var (
 	listOfMetrics = []string{ // default metrics to enable - contains all metrics for Mini / MK4 / Core One and XL
+		"side_fsensor",
+		"fsensor_raw",
 		"adj_z",
 		"temp_ambient",
 		"temp_bed",

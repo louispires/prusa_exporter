@@ -25,7 +25,8 @@ services:
       - ./docs/config/grafana/dashboards:/var/lib/grafana/dashboards
 
   exporter:
-    image: pubeldev/prusa_exporter:2.0.0-alpha3
+    #image: pubeldev/prusa_exporter:2.0.0-alpha3
+    build: .
     container_name: exporter
     restart: unless-stopped
     volumes:

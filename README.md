@@ -52,11 +52,21 @@ M331 eth_in
 - `type` - model of the printer
   - MK3.9 / MK4 / MK4S / XL / Core One ...
 
-### Dashboard
+### Dashboards
 
-Pretty basic but nice and cozy [dashboard](docs/Prusa_Metrics_MK4_C1.json) for TV.
+I've prepared cozy [dashboards](docs/), but this being Prometheus, you can do whatever you want. Fun fact, Mini dashboard works for MKx and Core One and MKx dashboard works for Core One but not vice versa. XL dashboard is specific for XL.
 
-![dashboard](docs/readme/dashboard.png)
+#### Prusa MKx (MK3.5(S) / MK3.9(S) / MK4(S))
+![mkxdashboard](docs/readme/mkx_dashboard.png)
+
+#### Prusa Core One
+![c1dashboard](docs/readme/c1_dashboard.png)
+
+#### Prusa XL
+
+PLACEHOLDER
+
+#### Prusa Mini
 ![minidashboard](docs/readme/mini_dashboard.png)
 
 # Roadmap
@@ -90,13 +100,15 @@ alpha3
 alpha4
 - [ ] further optimization
 - [x] ~~PoC controlling printer via Grafana~~ - PoC work but it's flawed - scrapping - [prusa_proxy](https://github.com/pubeldev/prusa_proxy)
-- [ ] Mini dashboard
+- [x] Mini dashboard
+- [ ] MKx dashboard
+- [ ] Core One dashboard
 - [ ] XL dashboard
 
 beta1
 - [x] ~~start testing at Raspberry Pi 4 (if not feasible then 5)~~ - not going to build Raspberry Pi image
-- [ ] create tests
-- [ ] reenable tests in pipeline
+- [x] create tests
+- [x] reenable tests in pipeline
 
 beta2
 - [ ] improve stability and optimize code
