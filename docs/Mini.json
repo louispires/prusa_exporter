@@ -1505,9 +1505,9 @@
       "pluginVersion": "12.2.1",
       "targets": [
         {
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
-          "expr": "prusa_info{printer_address=\"$printer_address\"}",
+          "expr": "prusa_status_info{printer_address=\"$printer_address\"} == 4",
           "instant": true,
           "interval": "",
           "legendFormat": "{{printer_job_name}}",
@@ -2633,7 +2633,7 @@
   "timezone": "browser",
   "title": "Prusa Mini / Overview",
   "uid": "adkkr69",
-  "version": 48,
+  "version": 49,
   "weekStart": "",
   "id": null
 }
