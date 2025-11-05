@@ -16,6 +16,10 @@ import (
 
 var (
 	listOfMetrics = []string{ // default metrics to enable - contains all metrics for Mini / MK4 / Core One and XL
+		"bedlet_target",
+		"dwarfs_mcu_temp",
+		"dwarfs_board_temp",
+		"loadcell",
 		"side_fsensor",
 		"fsensor_raw",
 		"adj_z",
