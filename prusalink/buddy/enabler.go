@@ -326,32 +326,30 @@ func EnableUDPmetrics(printers []config.Printers) {
 	var wg sync.WaitGroup
 
 	for i, s := range printers {
-		wg.Add(1)
-		go func(i int, s config.Printers) {
-			defer wg.Done()
-			log.Debug().Msg("Enabling UDP metrics at " + s.Address)
 
-			send, err := sendGcode("enable_udp_metrics.gcode", s)
+		log.Debug().Msg("Enabling UDP metrics at " + s.Address)
 
-			if err != nil {
-				log.Error().Msg("Failed to send gcode to " + s.Address + ": " + err.Error())
-				configuration.Printers[i].UDPMetricsEnabled = false
-				return
-			}
-			log.Debug().Msg("Gcode sent to " + s.Address + ": " + string(send))
+		send, err := sendGcode("enable_udp_metrics.gcode", s)
 
-			start, err := startGcode("enable_udp_metrics.gcode", s)
+		if err != nil {
+			log.Error().Msg("Failed to send gcode to " + s.Address + ": " + err.Error())
+			configuration.Printers[i].UDPMetricsEnabled = false
+			return
+		}
+		log.Debug().Msg("Gcode sent to " + s.Address + ": " + string(send))
 
-			if err != nil {
-				log.Error().Msg("Failed to start gcode at " + s.Address + ": " + err.Error())
-				configuration.Printers[i].UDPMetricsEnabled = false
-				return
-			}
-			log.Debug().Msg("Gcode started at " + s.Address + ": " + string(start))
+		start, err := startGcode("enable_udp_metrics.gcode", s)
 
-			configuration.Printers[i].UDPMetricsEnabled = true
-			log.Info().Msgf("UDP metrics gcode for printer %s (%s) sent and started", s.Name, s.Address)
-		}(i, s)
+		if err != nil {
+			log.Error().Msg("Failed to start gcode at " + s.Address + ": " + err.Error())
+			configuration.Printers[i].UDPMetricsEnabled = false
+			return
+		}
+		log.Debug().Msg("Gcode started at " + s.Address + ": " + string(start))
+
+		configuration.Printers[i].UDPMetricsEnabled = true
+		log.Info().Msgf("UDP metrics gcode for printer %s (%s) sent and started", s.Name, s.Address)
+
 	}
 	wg.Wait()
 }
