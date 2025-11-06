@@ -58,20 +58,23 @@ I've prepared cozy [dashboards](docs/), but this being Prometheus, you can do wh
 
 #### Prusa MKx (MK3.5(S) / MK3.9(S) / MK4(S))
 ![mkxdashboard](docs/readme/mkx_dashboard.png)
+[Dashboard](docs/MKx.json)
 
 #### Prusa Core One
 ![c1dashboard](docs/readme/c1_dashboard.png)
+[Dashboard](docs/C1.json)
 
 #### Prusa XL
-
 ![xldashboard](docs/readme/xl_dashboard.png)
+[Dashboard](docs/XL.json)
 
 #### Prusa XL - fancy version for 5 Tools (BETA and WIP)
-
 ![xl5tbetadashboard](docs/readme/xl5tbeta_dashboard.gif)
+[Dashboard](docs/XL5TBeta.json)
 
 #### Prusa Mini
 ![minidashboard](docs/readme/mini_dashboard.png)
+[Dashboard](docs/Mini.json)
 
 # Roadmap
 
@@ -107,7 +110,7 @@ alpha4
 - [x] Mini dashboard
 - [x] MKx dashboard
 - [x] Core One dashboard
-- [ ] XL dashboard
+- [x] XL dashboard
 
 beta1
 - [x] ~~start testing at Raspberry Pi 4 (if not feasible then 5)~~ - not going to build Raspberry Pi image
@@ -115,11 +118,11 @@ beta1
 - [x] reenable tests in pipeline
 
 beta2
-- [ ] improve stability and optimize code
+- [x] improve stability and optimize code
 - [x] ~~finalize controlling printer via Grafana~~
 
 rc1
-- [ ] create overview dashboard for all printers in system
+- [x] create overview dashboard for all printers in system
 - [ ] further testing
 
 final
