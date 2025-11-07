@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/pstrobl96/prusa_exporter/config"
@@ -353,14 +355,17 @@ func TestEnableUDPmetrics(t *testing.T) {
 	// Save original configuration for cleanup
 	originalConfig := configuration
 
-	// Track the requests made to the test server
+	// Track the requests made to the test server with thread-safe access
+	var requestsMutex sync.Mutex
 	var requests []string
-	requestCount := 0
+	var requestCount int32
 
 	// Create a test server
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCount++
+		atomic.AddInt32(&requestCount, 1)
+		requestsMutex.Lock()
 		requests = append(requests, fmt.Sprintf("%s %s", r.Method, r.URL.Path))
+		requestsMutex.Unlock()
 
 		// Handle PUT request (sendGcode)
 		if r.Method == http.MethodPut && strings.HasSuffix(r.URL.Path, "enable_udp_metrics.gcode") {
@@ -428,7 +433,7 @@ func TestEnableUDPmetrics(t *testing.T) {
 
 	// Verify that the correct number of requests were made
 	// Each printer should make: DELETE, PUT, POST = 3 requests per printer
-	expectedRequests := len(printers) * 3
+	expectedRequests := int32(len(printers) * 3)
 	if requestCount != expectedRequests {
 		t.Errorf("Expected %d requests, got %d", expectedRequests, requestCount)
 	}
@@ -438,6 +443,7 @@ func TestEnableUDPmetrics(t *testing.T) {
 	putCount := 0
 	postCount := 0
 
+	requestsMutex.Lock()
 	for _, req := range requests {
 		if strings.Contains(req, "DELETE") {
 			deleteCount++
@@ -447,6 +453,7 @@ func TestEnableUDPmetrics(t *testing.T) {
 			postCount++
 		}
 	}
+	requestsMutex.Unlock()
 
 	expectedEachType := len(printers)
 	if deleteCount != expectedEachType {

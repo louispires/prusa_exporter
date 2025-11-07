@@ -9,6 +9,7 @@ import (
 	"image/png"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/icholy/digest"
@@ -47,7 +48,31 @@ var (
 	}
 
 	configuration config.Config
+	configMutex   sync.RWMutex
 )
+
+// GetConfiguration safely returns a copy of the current configuration
+func GetConfiguration() config.Config {
+	configMutex.RLock()
+	defer configMutex.RUnlock()
+	return configuration
+}
+
+// SetConfiguration safely updates the configuration
+func SetConfiguration(newConfig config.Config) {
+	configMutex.Lock()
+	defer configMutex.Unlock()
+	configuration = newConfig
+}
+
+// UpdatePrinterUDPStatus safely updates the UDP metrics enabled status for a specific printer
+func UpdatePrinterUDPStatus(index int, enabled bool) {
+	configMutex.Lock()
+	defer configMutex.Unlock()
+	if index >= 0 && index < len(configuration.Printers) {
+		configuration.Printers[index].UDPMetricsEnabled = enabled
+	}
+}
 
 // BoolToFloat is used for basic parsing boolean to float64
 // 0.0 for false, 1.0 for true
@@ -101,13 +126,14 @@ func accessPrinterEndpoint(path string, printer config.Printers) ([]byte, error)
 		err    error
 	)
 
+	cfg := GetConfiguration()
 	if printer.Apikey == "" {
 		client := &http.Client{
 			Transport: &digest.Transport{
 				Username: printer.Username,
 				Password: printer.Password,
 			},
-			Timeout: 5 * time.Duration(configuration.Exporter.ScrapeTimeout) * time.Second,
+			Timeout: 5 * time.Duration(cfg.Exporter.ScrapeTimeout) * time.Second,
 		}
 		res, err = client.Get(url)
 
@@ -117,7 +143,7 @@ func accessPrinterEndpoint(path string, printer config.Printers) ([]byte, error)
 	} else {
 		req, err := http.NewRequest("GET", url, nil)
 		client := &http.Client{
-			Timeout: 5 * time.Duration(configuration.Exporter.ScrapeTimeout) * time.Second,
+			Timeout: 5 * time.Duration(cfg.Exporter.ScrapeTimeout) * time.Second,
 		}
 
 		if err != nil {
@@ -376,8 +402,9 @@ func GetPrinterType(printer config.Printers) (string, error) {
 
 // ProbePrinter is used to probe the printer - just testing the connection
 func ProbePrinter(printer config.Printers) (bool, error) {
+	cfg := GetConfiguration()
 	req, _ := http.NewRequest("GET", "http://"+printer.Address+"/", nil)
-	client := &http.Client{Timeout: time.Duration(configuration.Exporter.ScrapeTimeout) * time.Millisecond}
+	client := &http.Client{Timeout: time.Duration(cfg.Exporter.ScrapeTimeout) * time.Millisecond}
 	r, e := client.Do(req)
 
 	if e != nil {

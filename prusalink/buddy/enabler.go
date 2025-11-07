@@ -82,9 +82,9 @@ var (
 
 // getLocalIP finds and returns the first ethernet or WiFi IP address, avoiding Docker interfaces.
 func getLocalIP() (string, error) {
-
-	if configuration.Exporter.IPOverride != "" {
-		return configuration.Exporter.IPOverride, nil
+	cfg := GetConfiguration()
+	if cfg.Exporter.IPOverride != "" {
+		return cfg.Exporter.IPOverride, nil
 	}
 
 	interfaces, err := net.Interfaces()
@@ -180,7 +180,8 @@ func gcodeInit() (init string, err error) {
 	// Write the initial lines
 	builder.WriteString(fmt.Sprintf("M330 SYSLOG\nM334 %s 8514\nM340 %s 13514", ip, ip))
 
-	if configuration.Exporter.AllMetricsUDP {
+	cfg := GetConfiguration()
+	if cfg.Exporter.AllMetricsUDP {
 		for _, metric := range allMetricsList {
 			builder.WriteString(fmt.Sprintf("\nM331 %s", metric))
 		}
@@ -191,9 +192,9 @@ func gcodeInit() (init string, err error) {
 		builder.WriteString(fmt.Sprintf("\nM332 %s", metric)) // disable all metrics first for ease the life of the MCU
 	}
 
-	if len(configuration.Exporter.ExtraMetrics) > 0 {
-		log.Info().Msgf("Adding extra UDP metrics: %v", configuration.Exporter.ExtraMetrics)
-		listOfMetrics = append(listOfMetrics, configuration.Exporter.ExtraMetrics...)
+	if len(cfg.Exporter.ExtraMetrics) > 0 {
+		log.Info().Msgf("Adding extra UDP metrics: %v", cfg.Exporter.ExtraMetrics)
+		listOfMetrics = append(listOfMetrics, cfg.Exporter.ExtraMetrics...)
 	}
 
 	// Loop through the list of metrics and append each line
@@ -218,12 +219,13 @@ func sendGcode(filename string, printer config.Printers) ([]byte, error) {
 
 	url := fmt.Sprintf("http://%s/api/v1/files/usb//%s", printer.Address, filename)
 
+	cfg := GetConfiguration()
 	client := &http.Client{
 		Transport: &digest.Transport{
 			Username: printer.Username,
 			Password: printer.Password,
 		},
-		Timeout: time.Duration(configuration.Exporter.ScrapeTimeout) * time.Second,
+		Timeout: time.Duration(cfg.Exporter.ScrapeTimeout) * time.Second,
 	}
 
 	// Create a new PUT request
@@ -256,12 +258,13 @@ func deleteGcode(filename string, printer config.Printers) ([]byte, error) {
 
 	url := fmt.Sprintf("http://%s/api/v1/files/usb//%s", printer.Address, filename)
 
+	cfg := GetConfiguration()
 	client := &http.Client{
 		Transport: &digest.Transport{
 			Username: printer.Username,
 			Password: printer.Password,
 		},
-		Timeout: time.Duration(configuration.Exporter.ScrapeTimeout) * time.Second,
+		Timeout: time.Duration(cfg.Exporter.ScrapeTimeout) * time.Second,
 	}
 
 	// Create a new DELETE request. The third argument is nil as DELETE requests do not have a body.
@@ -295,12 +298,13 @@ func startGcode(filename string, printer config.Printers) ([]byte, error) {
 		err    error
 	)
 
+	cfg := GetConfiguration()
 	client := &http.Client{
 		Transport: &digest.Transport{
 			Username: printer.Username,
 			Password: printer.Password,
 		},
-		Timeout: time.Duration(configuration.Exporter.ScrapeTimeout) * time.Second,
+		Timeout: time.Duration(cfg.Exporter.ScrapeTimeout) * time.Second,
 	}
 	res, err = client.Post(url, "application/json", nil)
 
@@ -326,30 +330,32 @@ func EnableUDPmetrics(printers []config.Printers) {
 	var wg sync.WaitGroup
 
 	for i, s := range printers {
+		wg.Add(1)
+		go func(i int, s config.Printers) {
+			defer wg.Done()
+			log.Debug().Msg("Enabling UDP metrics at " + s.Address)
 
-		log.Debug().Msg("Enabling UDP metrics at " + s.Address)
+			send, err := sendGcode("enable_udp_metrics.gcode", s)
 
-		send, err := sendGcode("enable_udp_metrics.gcode", s)
+			if err != nil {
+				log.Error().Msg("Failed to send gcode to " + s.Address + ": " + err.Error())
+				UpdatePrinterUDPStatus(i, false)
+				return
+			}
+			log.Debug().Msg("Gcode sent to " + s.Address + ": " + string(send))
 
-		if err != nil {
-			log.Error().Msg("Failed to send gcode to " + s.Address + ": " + err.Error())
-			configuration.Printers[i].UDPMetricsEnabled = false
-			return
-		}
-		log.Debug().Msg("Gcode sent to " + s.Address + ": " + string(send))
+			start, err := startGcode("enable_udp_metrics.gcode", s)
 
-		start, err := startGcode("enable_udp_metrics.gcode", s)
+			if err != nil {
+				log.Error().Msg("Failed to start gcode at " + s.Address + ": " + err.Error())
+				UpdatePrinterUDPStatus(i, false)
+				return
+			}
+			log.Debug().Msg("Gcode started at " + s.Address + ": " + string(start))
 
-		if err != nil {
-			log.Error().Msg("Failed to start gcode at " + s.Address + ": " + err.Error())
-			configuration.Printers[i].UDPMetricsEnabled = false
-			return
-		}
-		log.Debug().Msg("Gcode started at " + s.Address + ": " + string(start))
-
-		configuration.Printers[i].UDPMetricsEnabled = true
-		log.Info().Msgf("UDP metrics gcode for printer %s (%s) sent and started", s.Name, s.Address)
-
+			UpdatePrinterUDPStatus(i, true)
+			log.Info().Msgf("UDP metrics gcode for printer %s (%s) sent and started", s.Name, s.Address)
+		}(i, s)
 	}
 	wg.Wait()
 }

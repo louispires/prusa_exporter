@@ -99,7 +99,7 @@ func (c *Collector) metricEnabled(m MetricName) bool {
 
 // NewCollector returns a new Collector for printer metrics
 func NewCollector(config config.Config) *Collector {
-	configuration = config
+	SetConfiguration(config)
 	commonLabels := config.PrusaLink.CommonLabels
 	if len(commonLabels) == 0 {
 		commonLabels = []string{"printer_address", "printer_model", "printer_name", "printer_job_name", "printer_job_path"}
