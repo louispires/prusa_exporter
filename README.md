@@ -193,10 +193,10 @@ rc1
 - [x] further testing
 
 rc2
-- [ ] even more testing
+- [x] even more testing
 
 final 2.0.0
-- [ ] 🎉
+- [x] 🎉
 
 2.1.0
 - [ ] Easier deploy without internet

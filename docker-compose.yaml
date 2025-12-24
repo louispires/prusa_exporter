@@ -26,7 +26,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   exporter:
-    image: pubeldev/prusa_exporter:2.0.0-rc1
+    image: pubeldev/prusa_exporter:2.0.0
     container_name: exporter
     restart: unless-stopped
     volumes:
@@ -42,6 +42,7 @@ services:
       - "--prusalink.scrape-timeout=5"
       - "--udp.ip-override=${HOST_IP}"
       - "--udp.gcode-enabled"
+      - "--loki.enabled"
       - "--loki.push-url=http://loki:3100/loki/api/v1/push"
     depends_on:
       - prometheus

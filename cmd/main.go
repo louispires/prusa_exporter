@@ -29,6 +29,7 @@ var (
 	udpAllMetrics          = kingpin.Flag("udp.all-metrics", "Expose all udp metrics. SEVERELY IMPACT CPU CAPABILITIES OF THE PRINTER! - default false").Default("false").Bool()
 	udpGcodeEnabled        = kingpin.Flag("udp.gcode-enabled", "Enable generating and sending metrics gcode. - default true").Default("true").Bool()
 	udpRegistry            = prometheus.NewRegistry()
+	lokiEnabled            = kingpin.Flag("loki.enabled", "Enable pushing job images to loki.").Default("false").Bool()
 	lokiPushURL            = kingpin.Flag("loki.push-url", "Loki push URL to send job image to loki. If empty, image will not appear in dashboard.").Default("").String()
 )
 
@@ -47,7 +48,7 @@ func Run() {
 
 	log.Info().Msg("Loading configuration file: " + *configFile)
 
-	config, err := config.LoadConfig(*configFile, *prusaLinkScrapeTimeout, *udpIPOverride, *udpAllMetrics, *udpExtraMetrics, *lokiPushURL)
+	config, err := config.LoadConfig(*configFile, *prusaLinkScrapeTimeout, *udpIPOverride, *udpAllMetrics, *udpExtraMetrics, *lokiPushURL, *lokiEnabled)
 
 	if err != nil {
 		log.Panic().Msg("Error loading configuration file " + err.Error())

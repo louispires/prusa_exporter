@@ -46,12 +46,14 @@ printers:
 		udpAllMetrics          bool
 		udpExtraMetrics        string
 		lokiPushURL            string
+		lokiEnabled            bool
 		expectedScrapeTimeout  int
 		expectedIPOverride     string
 		expectedAllMetrics     bool
 		expectedExtraMetrics   []string
 		expectedLokiURL        string
 		expectedPrinterCount   int
+		expectedLokiEnabled    bool
 	}{
 		{
 			name:                   "Default values",
@@ -60,12 +62,14 @@ printers:
 			udpAllMetrics:          false,
 			udpExtraMetrics:        "",
 			lokiPushURL:            "",
+			lokiEnabled:            false,
 			expectedScrapeTimeout:  10,
 			expectedIPOverride:     "",
 			expectedAllMetrics:     false,
 			expectedExtraMetrics:   nil,
 			expectedLokiURL:        "",
 			expectedPrinterCount:   2,
+			expectedLokiEnabled:    false,
 		},
 		{
 			name:                   "With overrides",
@@ -74,18 +78,20 @@ printers:
 			udpAllMetrics:          true,
 			udpExtraMetrics:        "metric1,metric2,metric3",
 			lokiPushURL:            "http://loki:3100/loki/api/v1/push",
+			lokiEnabled:            true,
 			expectedScrapeTimeout:  15,
 			expectedIPOverride:     "192.168.1.50",
 			expectedAllMetrics:     true,
 			expectedExtraMetrics:   []string{"metric1", "metric2", "metric3"},
 			expectedLokiURL:        "http://loki:3100/loki/api/v1/push",
 			expectedPrinterCount:   2,
+			expectedLokiEnabled:    true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config, err := LoadConfig(configPath, tt.prusaLinkScrapeTimeout, tt.udpIPOverride, tt.udpAllMetrics, tt.udpExtraMetrics, tt.lokiPushURL)
+			config, err := LoadConfig(configPath, tt.prusaLinkScrapeTimeout, tt.udpIPOverride, tt.udpAllMetrics, tt.udpExtraMetrics, tt.lokiPushURL, tt.expectedLokiEnabled)
 			if err != nil {
 				t.Errorf("LoadConfig() error = %v", err)
 				return
@@ -115,6 +121,10 @@ printers:
 
 			if config.Exporter.LokiPushURL != tt.expectedLokiURL {
 				t.Errorf("LokiPushURL = %s, expected %s", config.Exporter.LokiPushURL, tt.expectedLokiURL)
+			}
+
+			if config.Exporter.LokiPushURL != "" && !tt.expectedLokiEnabled {
+				t.Errorf("Loki should be disabled but LokiPushURL is set")
 			}
 
 			if len(config.Printers) != tt.expectedPrinterCount {
@@ -163,7 +173,7 @@ printers:
 
 func TestLoadConfigErrors(t *testing.T) {
 	t.Run("NonExistentFile", func(t *testing.T) {
-		_, err := LoadConfig("nonexistent.yml", 10, "", false, "", "")
+		_, err := LoadConfig("nonexistent.yml", 10, "", false, "", "", false)
 		if err == nil {
 			t.Error("LoadConfig() expected error for non-existent file")
 		}
@@ -188,7 +198,7 @@ printers:
 			t.Fatalf("Failed to create test config file: %v", err)
 		}
 
-		_, err = LoadConfig(configPath, 10, "", false, "", "")
+		_, err = LoadConfig(configPath, 10, "", false, "", "", false)
 		if err == nil {
 			t.Error("LoadConfig() expected error for invalid YAML")
 		}
@@ -284,7 +294,7 @@ printers:
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := LoadConfig(configPath, 10, "", false, "", "")
+		_, err := LoadConfig(configPath, 10, "", false, "", "", false)
 		if err != nil {
 			b.Errorf("LoadConfig() error: %v", err)
 		}
