@@ -45,7 +45,7 @@ printers:
 	}
 
 	// Test configuration loading
-	cfg, err := config.LoadConfig(configPath, 10, "", false, "", "")
+	cfg, err := config.LoadConfig(configPath, 10, "", false, "", "", false)
 	if err != nil {
 		t.Errorf("Integration test: config loading failed: %v", err)
 	}
@@ -221,7 +221,7 @@ printers:
 				t.Fatalf("Failed to create test config file: %v", err)
 			}
 
-			_, err = config.LoadConfig(configPath, 10, "", false, "", "")
+			_, err = config.LoadConfig(configPath, 10, "", false, "", "", false)
 
 			if tc.shouldPass && err != nil {
 				t.Errorf("Integration test: expected config to be valid but got error: %v", err)
@@ -349,7 +349,7 @@ printers:
 	}
 
 	// Load configuration using the config package
-	cfg, err := config.LoadConfig(configPath, 10, "192.168.1.100", false, "", "")
+	cfg, err := config.LoadConfig(configPath, 10, "192.168.1.100", false, "", "", false)
 	if err != nil {
 		t.Errorf("Integration test: failed to load config: %v", err)
 	}
@@ -402,7 +402,7 @@ printers:
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := config.LoadConfig(configPath, 10, "", false, "", "")
+		_, err := config.LoadConfig(configPath, 10, "", false, "", "", false)
 		if err != nil {
 			b.Errorf("Benchmark: config loading failed: %v", err)
 		}
